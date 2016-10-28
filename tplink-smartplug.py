@@ -21,6 +21,7 @@
 #
 import socket
 import argparse
+import json
 
 version = 0.1
 
@@ -44,7 +45,8 @@ commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
 			'countdown': '{"count_down":{"get_rules":{}}}',
 			'antitheft': '{"anti_theft":{"get_rules":{}}}',
 			'reboot'   : '{"system":{"reboot":{"delay":1}}}',
-			'reset'    : '{"system":{"reset":{"delay":1}}}'
+			'reset'    : '{"system":{"reset":{"delay":1}}}',
+			'status'   : '{"system":{"get_sysinfo":{}}}'
 }
 
 # Encryption and Decryption of TP-Link Smart Home Protocol
@@ -93,7 +95,14 @@ try:
 	data = sock_tcp.recv(2048)
 	sock_tcp.close()
 	
-	print "Sent:     ", cmd
-	print "Received: ", decrypt(data[4:])
+	if args.command == "status":
+		json_string =  decrypt(data[4:])
+		parsed_json = json.loads(json_string)
+		print(parsed_json["system"]["get_sysinfo"]["relay_state"])
+	else:
+		print "Sent:     ", cmd
+		print "Received: ", decrypt(data[4:])
+
 except socket.error:
 	quit("Cound not connect to host " + ip + ":" + str(port))
+
